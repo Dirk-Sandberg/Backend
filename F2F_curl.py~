@@ -109,7 +109,6 @@ for order in orders:
 for SKU in SKUsThatNeedOpponents:
     print(SKU)
     weeklyTournyFile = SkuParser.getNextSaturday(orderDate) + "_" + SKU + "_" + "participants.csv"
-    print("Should change this from orderDate probably!")
     if os.path.isfile(weeklyTournyFile):
         print("exists")
         OpponentPicker.pickOpponents(weeklyTournyFile)
@@ -127,14 +126,13 @@ NEED A WAY TO NOTIFY PLAYERS WHO THEIR OPPONENTS ARE
 # ---- Should probably go into a program named "AoE-Match-Checker.py" or something
 
 # - Use "Voobly.py" to find user ID number from username
-
+vooblyApiKey = "camzdurvkmdaar6cy83iovs6pid3u4gw"
+voobly = voobly.Voobly(vooblyApiKey)
+voobly.init()
 HistoryChecker = VooblyMatchHistory.VooblyScraper()
-nextSat = SkuParser.getNextSaturday(orderDate)
-prevSat = SkuParser.getPrevSaturday(orderDate)
+
 
 # - Use "VooblyMatchHistory.py" to get match history for user ID number
-winner = HistoryChecker.checkHistory("Akers","eldemiurgo", prevSat,nextSat)
-
 # - Find the opponents name for the user in the text response
 # - get the winner of that match, update a table.
 # - pick opponents for next round
