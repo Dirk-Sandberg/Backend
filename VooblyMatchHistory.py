@@ -12,6 +12,7 @@ import requests
 import voobly
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+import numpy as np
 
 
 class VooblyScraper():
@@ -47,62 +48,86 @@ class VooblyScraper():
         playersWhoBeatThisGuy = []
         losers = []
         matchDates = []
-        datesAgainstCorrectOpponent = [] # If these guys played more than one match, find the EARLIEST match that is within the specified time period
 
         while notPassedDate:
             pageHasMatchHistory = False
             getRequest = self.s.get(matchUrl)
             soup = BeautifulSoup(getRequest.content, "html.parser") # parsed html
-            print("SOUPING " + matchUrl)
+            #print("SOUPING " + matchUrl)
             #main thing to do: scrape all match history pages until date is outside of range (+1)
             allTDs = soup.findAll("td")
             for i, td in enumerate(allTDs):
+                if "have won" in td.text:
+                    pageHasMatchHistory = True
                 if "has won" in td.text:
                     pageHasMatchHistory = True
                     # Get the winner
+                    winner = ""
+                    loser = ""
+                    for a in allTDs[i+1].findAll("a"):
+                        self.test = allTDs[i+1] 
+                        loser = loser + a.text
+                    print("Loser is: " + loser)
                     for a in td.findAll("a"):
-                        if ( a.text[0] != "[" ) and ( a.text[-1] != "]"): # Don't want clan tags
-                            # Get the other player (loser)
-                            loser = allTDs[i+1].text
-                            
-                            # Get the date
-                            # date is in TD before the "has won" TD
-                            self.test1 = soup
-                            self.test2 = matchUrl
-                            matchDate = allTDs[i-1].text                            
-                            matchDate = self.convertDate(matchDate) # Correct format
-                            dateIsInsideMargin = self.checkIfDateIsInsideMargin(matchDate,earliestPossibleDate,LatestPossibleDate)
-                            if ( dateIsInsideMargin == -1 ):
-                                print(matchDate)
-                                print("DATE IS TOO EARLY \n\n")
-                                notPassedDate = False
-                                break # Stop searching match history by breaking while loop. This date is too far back in time
-                            if ( dateIsInsideMargin == 0): # 0 means it IS inside the margin
-                                playersWhoBeatThisGuy.append(a.text)
-                                matchDates.append(matchDate)
-                                losers.append(loser)
+                        # if ( a.text[0] != "[" ) and ( a.text[-1] != "]"): # Don't want clan tags
+                        # Get the other player (loser)
+                        #   loser = allTDs[i+1].text
+                        winner = winner + a.text
+
+                        # Get the date
+                        # date is in TD before the "has won" TD
+                        self.test1 = soup
+                        self.test2 = matchUrl
+                    matchDate = allTDs[i-1].text                            
+                    matchDate = self.convertDate(matchDate) # Correct format
+                    dateIsInsideMargin = self.checkIfDateIsInsideMargin(matchDate,earliestPossibleDate,LatestPossibleDate)
+                    if ( dateIsInsideMargin == -1 ):
+                        print(matchDate)
+                        print("DATE IS TOO EARLY \n\n")
+                        notPassedDate = False
+                        break # Stop searching match history by breaking while loop. This date is too far back in time
+                    if ( dateIsInsideMargin == 0): # 0 means it IS inside the margin
+                        if ( (opponent in loser) or (opponent in winner) ) :
+                            playersWhoBeatThisGuy.append(winner)
+                            matchDates.append(matchDate)
+                            print("\tLoser is: " + loser)
+                            losers.append(loser)
+                           # print("WINNER IS: " +winner)
+                           # print("LOSER IS: " + loser)
+                           
                             # -- If "OPPONENT" not in loser or winners: they didn't play!                                                                
-                lastTd = td
-            if ( not pageHasMatchHistory):
+            if (not pageHasMatchHistory):
                 # Stop searching match history by breaking while loop. The player hasn't played any matches earlier than what's displayed on this/the previous page
+                print("PAGE DOESNT HAVE MATCH HISTORY")
                 break 
-            pageCounter += 1 # Move to next page (i.e. 0/pageCounter#browser1 )
-            pagePart2 = str(pageCounter+1) + pagePart2[pagePart2.find("#"):] # Replace first character
+            pageCounter += 1 # Move to next page (i.e. 0/pageCounter#browser1 )            
+            pagePart2 = str(pageCounter) + pagePart2[pagePart2.find("#"):] # Replace first character
             matchUrl = pagePart1 + pagePart2
-        self.test1 = losers
-        self.test2 = playersWhoBeatThisGuy
-        self.test3 = matchDates
+
         print("Need to check to make sure this was the only match they played.")
         print("Otherwise, need to check all matches and get the first one played  in the timeframe allotted for the match!")
 
-        # rightIndexes = np.argsort(matchDates)
-        # rightindexedOpponents = opponents[rightindexes]
-        # rightindexedwinners = wiiners[rightindexes]
-        
+        # match history comes in as most [most recent, ... , last recent]
+        # We want the last recent games, so reverse the lists
+        playersWhoBeatThisGuy = playersWhoBeatThisGuy[::-1]
+        loser = losers[::-1]
+        matchDates = matchDates[::-1]
+        self.test1 = losers
+        self.test2 = playersWhoBeatThisGuy
+        self.test3 = matchDates        
+        earliestMatch = matchDates[0]
+        winnerOfEarliestMatch = playersWhoBeatThisGuy[0]
+        if len(playersWhoBeatThisGuy) == 0 :
+            return "N/A"
+        else:
+            return playersWhoBeatThisGuy[0]
+        '''
+        return winnerOfEarliestMatch
         if (opponent not in playersWhoBeatThisGuy) and (opponent not in losers):
             return "N/A"
         for i, winner in enumerate(playersWhoBeatThisGuy):
-            if winner in opponent: # If the winner of this match was the selected opponent for this bracket
+            if opponent in winner: # If the winner of this match was the selected opponent for this bracket
+                # Used "winnner in opponent" rather than winner == opponent because if username is [foo], voobly winner name is 'foo'
                 dateIsInsideMargin = self.checkIfDateIsInsideMargin(matchDates[i],earliestPossibleDate,LatestPossibleDate)
                 if ( dateIsInsideMargin == 0 ):
                     print("Doesn't check for earliest game played in the interval yet")
@@ -110,7 +135,7 @@ class VooblyScraper():
                     #datesAgainstCorrectOpponent.append(datetime.strptime(matchDates[i],"%Y-%m-%d"))#return opponent # opponent was a winner
         
         return player # If no opponent was returned, the player won
-    
+        '''
     def close(self):
         self.s.close()
         
