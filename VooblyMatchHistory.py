@@ -45,7 +45,7 @@ class VooblyScraper():
         pagePart1 = "https://www.voobly.com/profile/view/"+ playerIdNumberFromVoobly + "/Matches/games/matches/user/"+playerIdNumberFromVoobly+"/0/"
         pagePart2 = str(pageCounter) + "#pagebrowser1"
         matchUrl = pagePart1 + pagePart2
-        playersWhoBeatThisGuy = []
+        winners = []
         losers = []
         matchDates = []
 
@@ -62,23 +62,10 @@ class VooblyScraper():
                 if "has won" in td.text:
                     pageHasMatchHistory = True
                     # Get the winner
-                    winner = ""
-                    loser = ""
-                    for a in allTDs[i+1].findAll("a"):
-                        self.test = allTDs[i+1] 
-                        loser = loser + a.text
-                    print("Loser is: " + loser)
-                    for a in td.findAll("a"):
-                        # if ( a.text[0] != "[" ) and ( a.text[-1] != "]"): # Don't want clan tags
-                        # Get the other player (loser)
-                        #   loser = allTDs[i+1].text
-                        winner = winner + a.text
-
-                        # Get the date
-                        # date is in TD before the "has won" TD
-                        self.test1 = soup
-                        self.test2 = matchUrl
-                    matchDate = allTDs[i-1].text                            
+                    matchDate = allTDs[i-1].text 
+                    winner = td.text
+                    loser = allTDs[i+1].text
+                         
                     matchDate = self.convertDate(matchDate) # Correct format
                     dateIsInsideMargin = self.checkIfDateIsInsideMargin(matchDate,earliestPossibleDate,LatestPossibleDate)
                     if ( dateIsInsideMargin == -1 ):
@@ -88,12 +75,13 @@ class VooblyScraper():
                         break # Stop searching match history by breaking while loop. This date is too far back in time
                     if ( dateIsInsideMargin == 0): # 0 means it IS inside the margin
                         if ( (opponent in loser) or (opponent in winner) ) :
-                            playersWhoBeatThisGuy.append(winner)
-                            matchDates.append(matchDate)
-                            print("\tLoser is: " + loser)
-                            losers.append(loser)
-                           # print("WINNER IS: " +winner)
-                           # print("LOSER IS: " + loser)
+                            if ( not ( ( opponent in winner) and (player in winner) ) ):
+                                if ( not ( ( opponent in loser) and (player in loser) ) ):
+                                    print(matchDate, winner, loser)
+                                    winners.append(winner)
+                                    matchDates.append(matchDate)
+                                    losers.append(loser)
+
                            
                             # -- If "OPPONENT" not in loser or winners: they didn't play!                                                                
             if (not pageHasMatchHistory):
@@ -109,23 +97,18 @@ class VooblyScraper():
 
         # match history comes in as most [most recent, ... , last recent]
         # We want the last recent games, so reverse the lists
-        playersWhoBeatThisGuy = playersWhoBeatThisGuy[::-1]
-        loser = losers[::-1]
+        winners = winners[::-1]
+        losers = losers[::-1]
         matchDates = matchDates[::-1]
-        self.test1 = losers
-        self.test2 = playersWhoBeatThisGuy
-        self.test3 = matchDates        
-        earliestMatch = matchDates[0]
-        winnerOfEarliestMatch = playersWhoBeatThisGuy[0]
-        if len(playersWhoBeatThisGuy) == 0 :
+        if len(winners) == 0 :
             return "N/A"
         else:
-            return playersWhoBeatThisGuy[0]
+            return winners[0]
         '''
         return winnerOfEarliestMatch
-        if (opponent not in playersWhoBeatThisGuy) and (opponent not in losers):
+        if (opponent not in winners) and (opponent not in losers):
             return "N/A"
-        for i, winner in enumerate(playersWhoBeatThisGuy):
+        for i, winner in enumerate(winners):
             if opponent in winner: # If the winner of this match was the selected opponent for this bracket
                 # Used "winnner in opponent" rather than winner == opponent because if username is [foo], voobly winner name is 'foo'
                 dateIsInsideMargin = self.checkIfDateIsInsideMargin(matchDates[i],earliestPossibleDate,LatestPossibleDate)
