@@ -12,10 +12,11 @@ import os.path
 import opponentPicker
 import voobly
 import VooblyMatchHistory
-
+import EmailSender
 
 SkuParser = skuParser.SkuParser()
 OpponentPicker = opponentPicker.OpponentPicker()
+emailer = EmailSender.Mailer()
 
 print("Currently, this grabs all orders ever (at 50+ orders we will need to rework it due to squarespace API), writes all of them to two databases: FiveToFightCustomers.csv & FiveToFightsOrders.csv\n Enhancements:\n\tRead from database - append new orders\n\tOnly do weekly orders\n\tHandle 50+ orders")
 # Get information about orders from squarespace
@@ -121,10 +122,25 @@ for SKU in SKUsThatNeedOpponents:
 '''
 NEED A WAY TO NOTIFY PLAYERS WHO THEIR OPPONENTS ARE
 '''
+nextSat = SkuParser.getNextSaturday(orderDate)
+emails = ["HenryDeHockey@gmail.com", "ssandberg11@gmail.com","averyrapson@gmail.com", "eriksandbergum@gmail.com"]
+usernames = ["OG_Albino","Tacaro"  , "Elmoooooo", "Alnatheir"]
+opponents = ["Alnatheir","Elmooooo","Tacaro"    , "OG_Albino"]
+with open("C:\\Users\\Erik\\Desktop\\junk.html", 'r') as file:
+    part1 = file.read()
+with open("C:\\Users\\Erik\\Desktop\\junk2.html",'r') as file:
+    part2 = file.read()
+for i, email in enumerate(emails):
+    htmlMessage = "Hi, <b>" + usernames[i] + "</b></br></br>"
+    htmlMessage += part1
+    htmlMessage += opponents[i]
+    htmlMessage += part2
+    msg = emailer.create_message_without_attachment("esandberg@fivetofight.com",email,"Five To Fight Tournament - " + SKU + " - " + nextSat, htmlMessage)
+    emailer.send_message("me",msg)
+
 # ------------------
 
 # --------------------- Check who won the AoE games by scraping Voobly
-# ---- Should probably go into a program named "AoE-Match-Checker.py" or something
 
 # - Use "Voobly.py" to find user ID number from username
 
