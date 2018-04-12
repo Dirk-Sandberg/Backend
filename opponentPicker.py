@@ -11,15 +11,47 @@ Creates a new column in the "Participants" table for opponents
 
 '''
 import numpy as np
+import SpreadSheet
 
 class OpponentPicker():
     def __init__(self):
         self.allParticipants = []
         self.d = []
-        pass
-    
-    def pickOpponents(self,file):
-        with open(file, 'r') as f:
+        self.SS = SpreadSheet.SSWriter()
+
+    def pickOpponents2(self,filename):
+        print(filename)
+        try:
+            allParticipants = self.SS.readSheet(filename)
+        except:
+            allParticipants = []
+        numParticipants = len(allParticipants)
+        if numParticipants == 0:
+            print("NO PARTICIPANTS HERE!")
+            return
+        pairs = {}
+        for participant in allParticipants:
+            if participant["username"] not in pairs.keys():
+                p = participant["username"]
+                n = np.random.randint(numParticipants)
+                opp = allParticipants[n]["username"]
+                while opp == p:
+                    n = np.random.randint(numParticipants)
+                    opp = allParticipants[n]["username"]
+                pairs[p] = opp
+                pairs[opp] = p
+        for participant in allParticipants:
+            p = participant["username"]
+            opp = pairs[p]
+            participant["opponent"] = ",".join([participant["opponent"],opp])
+            print(p + "'s opponent should be: " + opp)
+        self.SS.writeSheet(filename, allParticipants)
+
+                
+        
+'''
+    def pickOpponents(self,filename):
+        with open(filename, 'r') as f:
             d = f.read().splitlines()
         for user in d:
             self.allParticipants.append(user.split(",")[0])
@@ -36,7 +68,7 @@ class OpponentPicker():
                 self.pairs[p] = opp
                 self.pairs[opp] = p
         # ---- Rewrite to table
-        with open(file, 'w') as f:
+        with open(filename, 'w') as f:
             for user in self.d:
                 userSplit = user.split(",")
                 userSplit[3] = self.pairs[userSplit[0]]
@@ -44,3 +76,4 @@ class OpponentPicker():
                 f.write(line)
 
 
+'''

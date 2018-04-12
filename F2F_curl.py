@@ -34,7 +34,12 @@ customersDB = []
 
 # Load in local Orders database
 availableSKUs = ['FN-DUO', "FN-SOLO", "FN-SQUAD", "AoE-SOLO", 'FN-SOLO-01', 'FN-SOLO-02', 'FN-DUO-01','FN-DUO-02','FN-SQUAD-01','FN-SQUAD-02','AoE-SOLO-01','AoE-SOLO-02']#, 'FN-DUO', 'FN-SQUAD', 'AoE-SOLO']
-SKUsThatNeedOpponents = ["AoE-SOLO-01"] #FN-SOLO-01
+SKUDictOfLists = {} # dictionary with keys being the available SKUs. values of the keys are lists
+# the lists hold a dict for each player participating in that SKU
+for sku in availableSKUs:
+    SKUDictOfLists[sku] = [] #{"AoE-SOLO-01":[],"AoE-SOLO-02":[]}
+
+SKUsThatNeedOpponents = ["FN-SOLO-01"] # ["AoE-SOLO-01"]
 #ordersDB = {}
 ordersDB = []
 
@@ -59,10 +64,10 @@ for order in orders:
     except:
         paypal = "N/A"
     try:
-        inGameName = order['formSubmission'][1]['value']
+        username = order['formSubmission'][1]['value']
     except:
-        inGameName = "N/A"
-    customersDict = {'email' : email, 'firstName' : firstName, 'lastName' : lastName, 'billingAddress' : billingAddress, 'phone':phone, 'paypal' : paypal, 'inGameName' : inGameName}
+        username = "N/A"
+    customersDict = {'email' : email, 'firstName' : firstName, 'lastName' : lastName, 'billingAddress' : billingAddress, 'phone':phone, 'paypal' : paypal, 'username' : username}
 
     # ------- Append to local customer database
     customersDB.append(customersDict)  
@@ -90,7 +95,11 @@ for order in orders:
     # --------------------------- Parse SKUs and add everyone in a particular tournament to a list
     for SKU in products:
         if products[SKU] != 0:
-            SkuParser.addPurchasedSkusToTable(SKU,inGameName, email, orderDate)
+            SKUDictOfLists[SKU].append({"username":username,"email":email, "orderDate":orderDate,"wins":0,"opponent":"N/A"})
+
+    #for SKU in products:
+    #    if products[SKU] != 0:
+    #        SkuParser.addPurchasedSkusToTable(SKU,username, email, orderDate)
  
 # ------------------- Write customers database & orders database to file
 SheetWriter.writeSheet("FiveToFightCustomers.csv",customersDB)
@@ -98,15 +107,20 @@ SheetWriter.writeSheet("FiveToFightOrders.csv",ordersDB) # only need to call thi
 
 
 # --------------------------- Check the tournament list for each product and assign opponents
-
+# Write the participants to a product-specific .csv file
+for SKU in availableSKUs:
+    weeklyTournyFile = SkuParser.getNextSaturday(orderDate) + "_" + SKU + "_" + "participants.csv"
+    SheetWriter.writeSheet(weeklyTournyFile, SKUDictOfLists[SKU])
+# Pick opponents for the product-specific .csv file
 for SKU in SKUsThatNeedOpponents:
     print(SKU)
     weeklyTournyFile = SkuParser.getNextSaturday(orderDate) + "_" + SKU + "_" + "participants.csv"
     print("Should change this from orderDate probably!")
-    if os.path.isfile(weeklyTournyFile):
-        print("exists")
-        OpponentPicker.pickOpponents(weeklyTournyFile)
-        print("picked opponents for " + SKU)
+    print(weeklyTournyFile)
+    #if os.path.isfile(weeklyTournyFile):
+    print("exists")
+    OpponentPicker.pickOpponents(weeklyTournyFile)
+    print("picked opponents for " + SKU)
         
    
      

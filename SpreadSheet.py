@@ -14,6 +14,8 @@ class SSWriter():
         self.name = "Bob"
 
     def writeSheet(self,sheetName,listOfDicts):
+        if len(listOfDicts) == 0:
+            return
         with open(sheetName, "w") as f:
             columnNames = listOfDicts[0].keys()
             DW = csv.DictWriter(f, columnNames)
