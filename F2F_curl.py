@@ -13,10 +13,12 @@ import opponentPicker
 import voobly
 import VooblyMatchHistory
 import EmailSender
+import SpreadSheet
 
 SkuParser = skuParser.SkuParser()
 OpponentPicker = opponentPicker.OpponentPicker()
 emailer = EmailSender.Mailer()
+SheetWriter = SpreadSheet.SSWriter()
 
 print("Currently, this grabs all orders ever (at 50+ orders we will need to rework it due to squarespace API), writes all of them to two databases: FiveToFightCustomers.csv & FiveToFightsOrders.csv\n Enhancements:\n\tRead from database - append new orders\n\tOnly do weekly orders\n\tHandle 50+ orders")
 # Get information about orders from squarespace
@@ -27,14 +29,14 @@ dictionary= json.loads(response.text)
 orders = dictionary['result']
 
 # Load in local Customer database
-customersDB = {}
-
+#customersDB = {}
+customersDB = []
 
 # Load in local Orders database
 availableSKUs = ['FN-DUO', "FN-SOLO", "FN-SQUAD", "AoE-SOLO", 'FN-SOLO-01', 'FN-SOLO-02', 'FN-DUO-01','FN-DUO-02','FN-SQUAD-01','FN-SQUAD-02','AoE-SOLO-01','AoE-SOLO-02']#, 'FN-DUO', 'FN-SQUAD', 'AoE-SOLO']
 SKUsThatNeedOpponents = ["AoE-SOLO-01"] #FN-SOLO-01
-ordersDB = {}
-
+#ordersDB = {}
+ordersDB = []
 
 # Read in information from orders on squarespace
 
@@ -61,16 +63,10 @@ for order in orders:
     except:
         inGameName = "N/A"
     customersDict = {'email' : email, 'firstName' : firstName, 'lastName' : lastName, 'billingAddress' : billingAddress, 'phone':phone, 'paypal' : paypal, 'inGameName' : inGameName}
-    customersDB[inGameName] = customersDict
-      
+
     # ------- Append to local customer database
-    # Currently rewrites the database entirely
-    customerUsernames = list(customersDB.keys())
-    with open("FiveToFightCustomers.csv","w") as f:
-        f.write(",".join( str(x) for x in list(customersDB[customerUsernames[0]].keys())) +"\n")
-        for customerUsername in customerUsernames:
-            f.write(",".join( str(x) for x in list(customersDB[customerUsername].values())) + "\n")
-            
+    customersDB.append(customersDict)  
+       
         
         
     # ------------------------- Order information
@@ -83,28 +79,24 @@ for order in orders:
         products[availableSKU] = 0
     for productPurchased in order['lineItems']:
         products[productPurchased['sku']] += productPurchased['quantity']
-       #if productPurchased['sku'] in products: # Each item in checkout cart is in the productPurchased list
-       #    products[productPurchased['sku']] += productPurchased['quantity'] # Record the quantity of each SKU
-       #else:
-       #    products[productPurchased['sku']] = productPurchased['quantity']
+
     ordersDict = {'id' : orderID , 'orderNumber' : orderNumber , 'orderDate' : orderDate, 'subtotal' : subtotal, 'currency' : currency}
     for itemSKU in products.keys():
-        ordersDict[itemSKU] = products[itemSKU]
-    ordersDB[orderID] = ordersDict
-    
+        ordersDict[itemSKU] = products[itemSKU]    
     # ----- Append to local customer database
-    ordersSKUs = list(ordersDB.keys())
-    with open("FiveToFightOrders.csv","w") as f:
-        f.write(",".join( str(x) for x in list(ordersDB[ordersSKUs[0]].keys())) +"\n")
-        for ordersSKU in ordersSKUs:
-            f.write(",".join( str(x) for x in list(ordersDB[ordersSKU].values())) + "\n")
-            
+    ordersDB.append(ordersDict)
+   
             
     # --------------------------- Parse SKUs and add everyone in a particular tournament to a list
     for SKU in products:
         if products[SKU] != 0:
             SkuParser.addPurchasedSkusToTable(SKU,inGameName, email, orderDate)
-    
+ 
+# ------------------- Write customers database & orders database to file
+SheetWriter.writeSheet("FiveToFightCustomers.csv",customersDB)
+SheetWriter.writeSheet("FiveToFightOrders.csv",ordersDB) # only need to call this once now, not in the for loop
+
+
 # --------------------------- Check the tournament list for each product and assign opponents
 
 for SKU in SKUsThatNeedOpponents:
@@ -119,10 +111,10 @@ for SKU in SKUsThatNeedOpponents:
    
      
 # -------------------
-'''
-NEED A WAY TO NOTIFY PLAYERS WHO THEIR OPPONENTS ARE
-'''
+#NEED A WAY TO NOTIFY PLAYERS WHO THEIR OPPONENTS ARE
+
 nextSat = SkuParser.getNextSaturday(orderDate)
+'''
 emails = ["HenryDeHockey@gmail.com", "ssandberg11@gmail.com","averyrapson@gmail.com", "eriksandbergum@gmail.com"]
 usernames = ["OG_Albino","Tacaro"  , "Elmoooooo", "Alnatheir"]
 opponents = ["Alnatheir","Elmooooo","Tacaro"    , "OG_Albino"]
@@ -137,7 +129,7 @@ for i, email in enumerate(emails):
     htmlMessage += part2
     msg = emailer.create_message_without_attachment("esandberg@fivetofight.com",email,"Five To Fight Tournament - " + SKU + " - " + nextSat, htmlMessage)
     emailer.send_message("me",msg)
-
+'''
 # ------------------
 
 # --------------------- Check who won the AoE games by scraping Voobly
@@ -155,7 +147,9 @@ winner = HistoryChecker.checkHistory("Akers","eldemiurgo", prevSat,nextSat)
 # - get the winner of that match, update a table.
 # - pick opponents for next round
 # - send emails, repeat
-    
+# - write winners to giant paypal mass payments sheet
+    # format is below
+    # paypalEmail, amount,currencycode(USD), transactionID, projectTitle
     
             
                
