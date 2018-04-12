@@ -162,6 +162,23 @@ winner = HistoryChecker.checkHistory("Akers","eldemiurgo", prevSat,nextSat)
 # - pick opponents for next round
 # - send emails, repeat
 # - write winners to giant paypal mass payments sheet
+winnersDB = []
+print("Probably want to keep better track of transaction IDs")
+transactionID = 0
+weeklyWinnersFile = "FiveToFightWinners" + nextSat + ".csv"
+for sku in availableSKUs:
+    dollarsPerWin = 5
+    currencyCode = "USD"
+    projectTitle = "Five To Fight: " + sku
+    transactionID += 1
+    weeklyTournyFile = SkuParser.getNextSaturday(orderDate) + "_" + SKU + "_" + "participants.csv"
+    allParticipants = SheetWriter.readSheet(weeklyTournyFile)
+    for participant in allParticipants:
+        if participant["wins"] != "0":
+            winnersDB.append([participant["email"],dollarsPerWin*int(participant["wins"]), currencyCode, transactionID, projectTitle])
+with open(weeklyWinnersFile, "w") as f:
+    for winner in winnersDB:
+        f.write(",".join(str(x) for x in winner) + "\n")
     # format is below
     # paypalEmail, amount,currencycode(USD), transactionID, projectTitle
     

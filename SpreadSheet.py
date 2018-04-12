@@ -28,9 +28,13 @@ class SSWriter():
         Each element in the list is a row in the CSV file
         The keys of the dictionary are the column names in the CSV file
         '''
-        listOfDicts = []
-        with open(sheetName,"r") as f:
-            DR = csv.DictReader(f)
-            for row in DR:
-                listOfDicts.append(row)
-        return listOfDicts
+        try:
+            listOfDicts = []
+            with open(sheetName,"r") as f:
+                DR = csv.DictReader(f)
+                for row in DR:
+                    listOfDicts.append(row)
+            return listOfDicts
+        except:
+            # File didn't exist, so return empty array
+            return []

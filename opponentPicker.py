@@ -19,8 +19,7 @@ class OpponentPicker():
         self.d = []
         self.SS = SpreadSheet.SSWriter()
 
-    def pickOpponents2(self,filename):
-        print(filename)
+    def pickOpponents(self,filename):
         try:
             allParticipants = self.SS.readSheet(filename)
         except:
@@ -31,20 +30,23 @@ class OpponentPicker():
             return
         pairs = {}
         for participant in allParticipants:
+            print(allParticipants)
             if participant["username"] not in pairs.keys():
                 p = participant["username"]
+                print(numParticipants)
                 n = np.random.randint(numParticipants)
                 opp = allParticipants[n]["username"]
+                print(p + "'s opponent should be: " + opp)                
                 while opp == p:
                     n = np.random.randint(numParticipants)
                     opp = allParticipants[n]["username"]
                 pairs[p] = opp
                 pairs[opp] = p
         for participant in allParticipants:
+            
             p = participant["username"]
             opp = pairs[p]
             participant["opponent"] = ",".join([participant["opponent"],opp])
-            print(p + "'s opponent should be: " + opp)
         self.SS.writeSheet(filename, allParticipants)
 
                 
