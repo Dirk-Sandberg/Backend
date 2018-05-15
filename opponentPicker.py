@@ -20,6 +20,7 @@ class OpponentPicker():
         self.SS = SpreadSheet.SSWriter()
 
     def pickOpponents(self,filename):
+        # What to do if an odd number of players? One has to get a buy? commented May 6, 2018 
         try:
             allParticipants = self.SS.readSheet(filename)
         except:
@@ -28,20 +29,26 @@ class OpponentPicker():
         if numParticipants == 0:
             print("NO PARTICIPANTS HERE!")
             return
+        if numParticipants == 1:
+            # Can't assign participant to one person
+            print("No opponents available!")
+            return
         pairs = {}
         for participant in allParticipants:
-            print(allParticipants)
-            if participant["username"] not in pairs.keys():
-                p = participant["username"]
-                print(numParticipants)
-                n = np.random.randint(numParticipants)
-                opp = allParticipants[n]["username"]
-                print(p + "'s opponent should be: " + opp)                
-                while opp == p:
+            if (participant['needsOpponent'] == "Yes"):  
+                print(allParticipants)
+                if participant["username"] not in pairs.keys():
+                    p = participant["username"]
+                    print(numParticipants)
                     n = np.random.randint(numParticipants)
                     opp = allParticipants[n]["username"]
-                pairs[p] = opp
-                pairs[opp] = p
+                    print(p + "'s opponent should be: " + opp)                
+                    while (opp == p ) or (opp['needsOpponent'] == "No" ):
+                        # Try to pick opponent again if the player is either himself or doesn't need an opponent
+                        n = np.random.randint(numParticipants)
+                        opp = allParticipants[n]["username"]
+                    pairs[p] = opp
+                    pairs[opp] = p
         for participant in allParticipants:
             
             p = participant["username"]

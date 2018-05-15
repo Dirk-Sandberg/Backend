@@ -13,13 +13,14 @@ class SSWriter():
     def __init__(self):
         self.name = "Bob"
 
-    def writeSheet(self,sheetName,listOfDicts):
+    def writeSheet(self,sheetName,listOfDicts, writeHeader=True):
         if len(listOfDicts) == 0:
             return
         with open(sheetName, "w") as f:
             columnNames = listOfDicts[0].keys()
             DW = csv.DictWriter(f, columnNames)
-            DW.writeheader() # write columnNames
+            if writeHeader:
+                DW.writeheader() # write columnNames
             DW.writerows(listOfDicts)
 
     def readSheet(self,sheetName):

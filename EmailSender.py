@@ -75,7 +75,7 @@ class Mailer():
         #Create the body of the message (a plain-text and an HTML version)
         #message.attach(MIMEText(message_text_plain, 'plain'))
         message.attach(MIMEText(message_text_html, 'html'))
-    
+        
         raw_message_no_attachment = base64.urlsafe_b64encode(message.as_bytes())
         raw_message_no_attachment = raw_message_no_attachment.decode()
         body  = {'raw': raw_message_no_attachment}

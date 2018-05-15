@@ -65,7 +65,8 @@ class VooblyScraper():
                     matchDate = allTDs[i-1].text 
                     winner = td.text
                     loser = allTDs[i+1].text
-                         
+                    print("Winner of match:1 ", winner)
+                    print("Loser of match:1 ", loser)
                     matchDate = self.convertDate(matchDate) # Correct format
                     dateIsInsideMargin = self.checkIfDateIsInsideMargin(matchDate,earliestPossibleDate,LatestPossibleDate)
                     if ( dateIsInsideMargin == -1 ):
@@ -74,11 +75,18 @@ class VooblyScraper():
                         notPassedDate = False
                         break # Stop searching match history by breaking while loop. This date is too far back in time
                     if ( dateIsInsideMargin == 0): # 0 means it IS inside the margin
+                        print("Winner of match:2 ", winner)
+                        print("Loser of match:2 ", loser)
+                        print ("opponent: " + opponent + "\n\tLoser: " + loser + "\n\twinner: " + winner)
                         if ( (opponent in loser) or (opponent in winner) ) :
+                            print("Winner of match:3 ", winner)
+                            print("Loser of match3: ", loser)
                             if ( not ( ( opponent in winner) and (player in winner) ) ):
+                                print("Winner of match:4 ", winner)
+                                print("Loser of match:4 ", loser)
                                 if ( not ( ( opponent in loser) and (player in loser) ) ):
                                     print(matchDate, winner, loser)
-                                    winners.append(winner)
+                                    winners.append(winner.replace(" has won",""))
                                     matchDates.append(matchDate)
                                     losers.append(loser)
 
@@ -141,6 +149,9 @@ class VooblyScraper():
         Converts date format from Voobly (6 March 2018) to standard (yyyy-mm-dd)
         '''
         self.test = date
+        print("DATE IS:   " + date)
+        if "ago" in date:
+            return datetime.today().strftime("%Y-%m-%d")
         if "Today" in date:
             return datetime.today().strftime("%Y-%m-%d")
         if "Yesterday" in date:
