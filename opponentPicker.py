@@ -43,7 +43,7 @@ class OpponentPicker():
                     n = np.random.randint(numParticipants)
                     opp = allParticipants[n]["username"]
                     print(p + "'s opponent should be: " + opp)                
-                    while (opp == p ) or (opp['needsOpponent'] == "No" ):
+                    while (opp == p ) or ( allParticipants[n]['needsOpponent'] == "No" ):
                         # Try to pick opponent again if the player is either himself or doesn't need an opponent
                         n = np.random.randint(numParticipants)
                         opp = allParticipants[n]["username"]
