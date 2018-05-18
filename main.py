@@ -7,30 +7,29 @@ Created on Sun Mar 18 08:29:42 2018
 
 import requests
 import json
+import skuParser
 import os.path
-import SkuParser
-import OpponentPicker
-import Voobly
+import opponentPicker
+import voobly
 import VooblyMatchHistory
 import EmailSender
 import SpreadSheet
 
-SkuParser = SkuParser.SkuParser()
-OpponentPicker = OpponentPicker.OpponentPicker()
+SkuParser = skuParser.SkuParser()
+OpponentPicker = opponentPicker.OpponentPicker()
 emailer = EmailSender.Mailer()
 SheetWriter = SpreadSheet.SSWriter()
 
 print("Currently, this grabs all orders ever (at 50+ orders we will need to rework it due to squarespace API), writes all of them to two databases: FiveToFightCustomers.csv & FiveToFightsOrders.csv\n Enhancements:\n\tRead from database - append new orders\n\tOnly do weekly orders\n\tHandle 50+ orders")
-# ------------------- Get information about orders from squarespace
-beginTime = "2018-05-10T12:00:00Z"
-stoppingTime = "2018-05-17T12:30:00Z"
-url = "https://api.squarespace.com/1.0/commerce/orders?modifiedAfter="+beginTime+"&modifiedBefore="+stoppingTime
+# Get information about orders from squarespace
+url = "https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2018-05-05T12:00:00Z&modifiedBefore=2018-05-15T12:30:00Z"
 header = dict(authorization= "Bearer aa96549b-a198-47fe-b260-33a0f3dbf2be")
 response = requests.get(url, headers = header)
 dictionary= json.loads(response.text)
 orders = dictionary['result']
 
 # Load in local Customer database
+#customersDB = {}
 customersDB = []
 
 # Load in local Orders database
@@ -41,6 +40,7 @@ for sku in availableSKUs:
     SKUDictOfLists[sku] = [] #{"AoE-SOLO-01":[],"AoE-SOLO-02":[]}
 
 SKUsThatNeedOpponents = ["AOE-SOLO-01"] # ["AoE-SOLO-01"]
+#ordersDB = {}
 ordersDB = []
 
 # Read in information from orders on squarespace
@@ -54,7 +54,7 @@ for order in orders:
     
     address2 = order['billingAddress']['address2']
     if order['billingAddress']['state'] == None:
-        order['billingAddress']['state'] = "N/A"
+        order['billingAddress']['state'] = "MG"
     print("Fix this cause of trash avery")
     if address2 == None:
         address2 = ""
@@ -62,7 +62,8 @@ for order in orders:
     
     phone = order['billingAddress']['phone']
     try:
-        paypal = order['formSubmission'][0]['value']
+        paypal = order['formSubmission'][0]['value'] 
+        foo = order
     except:
         paypal = "N/A"
     try:
@@ -74,6 +75,7 @@ for order in orders:
     # ------- Append to local customer database
     customersDB.append(customersDict)  
        
+        
         
     # ------------------------- Order information
     orderID = order['id']
@@ -112,10 +114,9 @@ SheetWriter.writeSheet("FiveToFightOrders.csv",ordersDB) # only need to call thi
 for SKU in availableSKUs:
     weeklyTournyFile = SkuParser.getNextSaturday(orderDate) + "_" + SKU + "_" + "participants.csv"
     SheetWriter.writeSheet(weeklyTournyFile, SKUDictOfLists[SKU])
-    
-    
 # Pick opponents for the product-specific .csv file
 for SKU in SKUsThatNeedOpponents:
+    print(SKU)
     weeklyTournyFile = SkuParser.getNextSaturday(orderDate) + "_" + SKU + "_" + "participants.csv"
     print("Should change this from orderDate probably!")
     OpponentPicker.pickOpponents(weeklyTournyFile)
@@ -167,19 +168,13 @@ for SKU in SKUsThatNeedOpponents:
         winner = HistoryChecker.checkHistory(player1,player2, prevSat,nextSat)
         # If player won, add a win to their score. This means they get 5$
         #   Player needs a new opponent if they win, unless they are the last player
-        print("\n\nWINNER WAS: " + winner + "\nPLAYER WAS: " + player1 + "\n")
         if ( winner == player1 ):
-            print("GOT HERE")
-            player['wins'] = float(player['wins']) + 1
+            player['wins'] = int(player['wins']) + 1
             player['needsOpponent'] = "Yes"
         # If there is no winner, they didn't play the game, so refund a portion of their money back
         #   Player should not be assigned a new opponent
-        if ( winner == player2 ):
-            # this player lost
-            player['wins'] = float(player['wins']) + 0.0
-            player['needsOpponent'] = "No"
         if ( winner == "N/A" ):
-            player['wins'] = float(player['wins']) + 0.8 
+            player['wins'] = int(player['wins']) + 0.8 
             player['needsOpponent'] = "No"
     SheetWriter.writeSheet(weeklyTournyFile,playerDict)
 
@@ -207,6 +202,6 @@ SheetWriter.writeSheet(weeklyWinnersFile,winnersDB,writeHeader=False)
     # format is below
     # paypalEmail, amount,currencycode(USD), transactionID, projectTitle
     
-'''  
+            
                
     

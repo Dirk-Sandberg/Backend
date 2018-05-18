@@ -9,7 +9,7 @@ apiURL = "http://www.voobly.com/api/validate?key="+apiKey
 
 
 import requests
-import Voobly
+import voobly
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import numpy as np
@@ -26,7 +26,7 @@ class VooblyScraper():
         self.password = "Gr1kjins"
         self.loginInfo = {"username":"Akers", "password":"Gr1kjins"}
         print(self.loginInfo)
-        self.voobly = Voobly.Voobly(self.apiKey)
+        self.voobly = voobly.Voobly(self.apiKey)
         self.voobly.init()
         self.connect()
         
@@ -36,9 +36,8 @@ class VooblyScraper():
         postRequest = self.s.post(self.authUrl, data=self.loginInfo)
         
     def checkHistory(self,player,opponent,earliestPossibleDate,LatestPossibleDate):
-        print("CHECKING " + player + "\n" )
-        #print("scraping data gives UTC time, while web page shows local time.")
-        #print("Need to account for that when checking if date is within timeframe")
+        print("scraping data gives UTC time, while web page shows local time.")
+        print("Need to account for that when checking if date is within timeframe")
         vooblyResponse = self.voobly.find_user(player)
         playerIdNumberFromVoobly = vooblyResponse.split("\n")[1].split(",")[0]
         notPassedDate = True # Changes to false if match history is so far back in time it's past the start of the tournament
@@ -66,17 +65,25 @@ class VooblyScraper():
                     matchDate = allTDs[i-1].text 
                     winner = td.text
                     loser = allTDs[i+1].text
+                    print("Winner of match:1 ", winner)
+                    print("Loser of match:1 ", loser)
                     matchDate = self.convertDate(matchDate) # Correct format
                     dateIsInsideMargin = self.checkIfDateIsInsideMargin(matchDate,earliestPossibleDate,LatestPossibleDate)
-                    print ("opponent: " + opponent + "\n\tLoser: " + loser + "\n\twinner: " + winner)
                     if ( dateIsInsideMargin == -1 ):
-                       # print(matchDate)
-                       # print("DATE IS TOO EARLY \n\n")
+                        print(matchDate)
+                        print("DATE IS TOO EARLY \n\n")
                         notPassedDate = False
                         break # Stop searching match history by breaking while loop. This date is too far back in time
                     if ( dateIsInsideMargin == 0): # 0 means it IS inside the margin
+                        print("Winner of match:2 ", winner)
+                        print("Loser of match:2 ", loser)
+                        print ("opponent: " + opponent + "\n\tLoser: " + loser + "\n\twinner: " + winner)
                         if ( (opponent in loser) or (opponent in winner) ) :
+                            print("Winner of match:3 ", winner)
+                            print("Loser of match3: ", loser)
                             if ( not ( ( opponent in winner) and (player in winner) ) ):
+                                print("Winner of match:4 ", winner)
+                                print("Loser of match:4 ", loser)
                                 if ( not ( ( opponent in loser) and (player in loser) ) ):
                                     print(matchDate, winner, loser)
                                     winners.append(winner.replace(" has won",""))
@@ -87,14 +94,14 @@ class VooblyScraper():
                             # -- If "OPPONENT" not in loser or winners: they didn't play!                                                                
             if (not pageHasMatchHistory):
                 # Stop searching match history by breaking while loop. The player hasn't played any matches earlier than what's displayed on this/the previous page
-               # print("PAGE DOESNT HAVE MATCH HISTORY")
+                print("PAGE DOESNT HAVE MATCH HISTORY")
                 break 
             pageCounter += 1 # Move to next page (i.e. 0/pageCounter#browser1 )            
             pagePart2 = str(pageCounter) + pagePart2[pagePart2.find("#"):] # Replace first character
             matchUrl = pagePart1 + pagePart2
 
-        #print("Need to check to make sure this was the only match they played.")
-        #print("Otherwise, need to check all matches and get the first one played  in the timeframe allotted for the match!")
+        print("Need to check to make sure this was the only match they played.")
+        print("Otherwise, need to check all matches and get the first one played  in the timeframe allotted for the match!")
 
         # match history comes in as most [most recent, ... , last recent]
         # We want the last recent games, so reverse the lists
@@ -102,7 +109,6 @@ class VooblyScraper():
         losers = losers[::-1]
         matchDates = matchDates[::-1]
         if len(winners) == 0 :
-            print("COULDNT FIND ANY WINNERS")
             return "N/A"
         else:
             return winners[0]
