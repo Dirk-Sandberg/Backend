@@ -36,25 +36,24 @@ class OpponentPicker():
         pairs = {}
         for participant in allParticipants:
             if (participant['needsOpponent'] == "Yes"):  
+                print(allParticipants)
                 if participant["username"] not in pairs.keys():
                     p = participant["username"]
-                    print("number of participants: ", numParticipants)
+                    print(numParticipants)
                     n = np.random.randint(numParticipants)
                     opp = allParticipants[n]["username"]
-                    while (opp == p ) or ( allParticipants[n]['needsOpponent'] == "No" ) or (opp in pairs.keys()) :
+                    print(p + "'s opponent should be: " + opp)                
+                    while (opp == p ) or ( allParticipants[n]['needsOpponent'] == "No" ):
                         # Try to pick opponent again if the player is either himself or doesn't need an opponent
                         n = np.random.randint(numParticipants)
                         opp = allParticipants[n]["username"]
                     pairs[p] = opp
                     pairs[opp] = p
-                    print(p + "'s opponent should be: " + opp)                
-        self.test = pairs
         for participant in allParticipants:
-            if (participant['needsOpponent'] == "Yes"):
-                p = participant["username"]
-                opp = pairs[p]
-                participant["opponent"] = ",".join([participant["opponent"],opp])
-        self.test2 = allParticipants
+            
+            p = participant["username"]
+            opp = pairs[p]
+            participant["opponent"] = ",".join([participant["opponent"],opp])
         self.SS.writeSheet(filename, allParticipants)
 
                 
