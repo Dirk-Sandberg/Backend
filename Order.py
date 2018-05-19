@@ -6,7 +6,7 @@ Created on Wed May 16 21:05:18 2018
 """
 
 class Order(): 
-    def _init(self, customerEmail, billingAddress, formSubmission, ID, orderNumber, createdOn, subtotal, lineItems ):
+    def __init__(self, customerEmail, billingAddress, formSubmission, ID, orderNumber, createdOn, subtotal, lineItems ):
         self.customerEmail = customerEmail
         self.billingAddress = billingAddress
         self.formSubmission = formSubmission

@@ -6,7 +6,7 @@ Created on Wed May 16 20:44:41 2018
 """
 
 class Customer():
-    def _init_(self, email, firstName, lastName, billingAddress, phone, paypal, username):
+    def __init__(self, email, firstName, lastName, billingAddress, phone, paypal, username):
         self.email = email
         self.firstName = firstName
         self.lastName = lastName

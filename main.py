@@ -47,8 +47,7 @@ ordersDB = []
 
 for order in orders:
     # -------------------- Customer information
-    tempOrder = Order.Order()
-    tempOrder._init(order['customerEmail'], order['billingAddress'], order['formSubmission'], order['id'],
+    tempOrder = Order.Order(order['customerEmail'], order['billingAddress'], order['formSubmission'], order['id'],
                     order['orderNumber'], order['createdOn'], order['subtotal'], order['lineItems'])
 
     products = {}
