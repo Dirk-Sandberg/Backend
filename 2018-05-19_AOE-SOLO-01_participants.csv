@@ -1,5 +1,5 @@
-username,email,orderDate,wins,opponent,needsOpponent
-litterbeach,jimmyf.code4life@gmail.com,2018-05-16T00:16:50.118Z,1.0,"N/A,Akers,swurlii",Yes
-OG_Albino,henrydehockey@gmail.com,2018-05-16T00:10:56.831Z,0.0,"N/A,swurlii",No
-Akers,eriksandbergum@gmail.com,2018-05-16T00:07:21.476Z,0.0,"N/A,litterbeach",No
-swurlii,averyrapson@gmail.com,2018-05-15T22:06:28.939Z,1.0,"N/A,OG_Albino,litterbeach",Yes
+email,needsOpponent,orderDate,wins,opponent,username
+jimmyf.code4life@gmail.com,No,2018-05-16T00:16:50.118Z,0.8,"N/A,OG_Albino",litterbeach
+henrydehockey@gmail.com,No,2018-05-16T00:10:56.831Z,0.8,"N/A,litterbeach",OG_Albino
+eriksandbergum@gmail.com,No,2018-05-16T00:07:21.476Z,0.8,"N/A,swurlii",Akers
+averyrapson@gmail.com,No,2018-05-15T22:06:28.939Z,0.8,"N/A,Akers",swurlii
