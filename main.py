@@ -14,6 +14,8 @@ import Voobly
 import VooblyMatchHistory
 import EmailSender
 import SpreadSheet
+import Order
+import Customer
 
 SkuParser = SkuParser.SkuParser()
 OpponentPicker = OpponentPicker.OpponentPicker()
@@ -209,7 +211,6 @@ for sku in availableSKUs:
 SheetWriter.writeSheet(weeklyWinnersFile,winnersDB,writeHeader=False)
     # format is below
     # paypalEmail, amount,currencycode(USD), transactionID, projectTitle
-    
-'''  
+
                
     
