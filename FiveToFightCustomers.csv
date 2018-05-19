@@ -1,5 +1,1 @@
-email,firstName,lastName,billingAddress,phone,paypal,username
-jimmyf.code4life@gmail.com,Jiaming,Fu,#348.5 1730 Graham Avenue West;;Saint Paul;MN;US;55116,07637428371,123456789,litterbeach
-henrydehockey@gmail.com,Henry,Petersen,928 linwood ave;;st. paul;MN;US;55105,6513569233,098098098098098,OG_Albino
-eriksandbergum@gmail.com,Erik,Sandberg,3220 W Ina Rd;Apt 3206;Tucson;AZ;US;85741,6515002578,6969696969,Akers
-averyrapson@gmail.com,Avery,Rapson,507 Linden Road;;Birmingham;MI;US;48009,2482381607,6969696969,swurlii
+last_name,billing_address,paypal,phone,first_name,username,email
