@@ -36,7 +36,8 @@ class Mailer():
         self.service = discovery.build('gmail', 'v1', http=self.http)
 
     def get_credentials(self):
-        """Gets valid user credentials from storage.
+        """
+        Gets valid user credentials from storage.
     
         If nothing has been stored, or if the stored credentials are invalid,
         the OAuth2 flow is completed to obtain the new credentials.
@@ -80,44 +81,49 @@ class Mailer():
         raw_message_no_attachment = raw_message_no_attachment.decode()
         body  = {'raw': raw_message_no_attachment}
         return body
-
-    def send_message(self, user_id, message):
-      #def send_message(self,service, user_id, message):
-      """Send an email message.
     
-      Args:
+    def prepareHtmlBody(self,toUsername, opponent, SKU, purpose):
+        base = "EmailTemplates/" + SKU + "/" + purpose +"/"
+        with open(base + "email_part1.html") as f:
+            body = f.read()
+        body += toUsername
+        with open(base + "email_part2.html") as f:
+            body += f.read()
+        body += opponent
+        with open(base + "email_part3.html") as f:
+            body += f.read()
+        print ("got body")
+        return body
+      
+    def createAndSend(self,toEmail, toUsername, opponent, SKU, purpose, nextSat):
+        htmlMessage = self.prepareHtmlBody(toUsername, opponent, SKU, purpose)
+        msg = self.create_message_without_attachment("esandberg@fivetofight.com",toEmail,"Five To Fight Tournament - " + SKU + " - " + nextSat, htmlMessage)
+        self.send_message("me",msg)
+        
+    def send_message(self, user_id, message):
+        #def send_message(self,service, user_id, message):
+        """Send an email message.
+    
+        Args:
         service: Authorized Gmail API service instance.
         user_id: User's email address. The special value "me"
         can be used to indicate the authenticated user.
         message: Message to be sent.
     
-      Returns:
+          Returns:
         Sent Message.
-      """
+        """
         
-      try:
-          message = (self.service.users().messages().send(userId=user_id, body=message)
-                       .execute())
-          print('Message Id: %s' % message['id'])
-      except Exception as error:
-          print('An error occurred: %s' % error)
+        try:
+            message = (self.service.users().messages().send(userId=user_id, body=message).execute())
+            print('Message Id: %s' % message['id'])
+        except Exception as error:
+            print('An error occurred: %s' % error)
+          
 
 
-'''
-End of function definitions!
 
-def main():
-    """Shows basic usage of the Gmail API.
 
-    Creates a Gmail API service object and outputs a list of label names
-    of the user's Gmail account.
-    """
-    credentials = get_credentials()
-    http = credentials.authorize(httplib2.Http())
-    service = discovery.build('gmail', 'v1', http=http)
 
-    msg = create_message_without_attachment("esandberg@fivetofight.com","eriksandbergum@gmail.com","Guy",r'Hi<br/>Html <b>hello HTML</b>', "Hello plain!!")
-    send_message(service,"me",msg)
 
-main()
-'''
+

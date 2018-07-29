@@ -1,0 +1,9 @@
+Inside the EmailTemplates folder we will have a folder for each SKU
+inside each SKU folder we will have subfolders for templates for the following purposes:
+	"You've successfully registered for a tournament" email
+	"You've been assigned an opponent" email
+All .html files in these folders should have the same name so code can get them easily.
+----------------
+We will also have a General folder which will contain non-product related emails
+	"You've won some money, here's how to redeem" email
+	"You failed to participate in the tournament, you don't get refunded" email

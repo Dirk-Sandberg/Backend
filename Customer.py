@@ -15,3 +15,15 @@ class Customer:
         self.phone = phone
         self.paypal = paypal
         self.username = username
+        
+
+def newCustomer(order,billingAddress):#, paypal,username):
+    customer = Customer(order.customer_email, 
+                        billingAddress.first_name,
+                        billingAddress.last_name, 
+                        billingAddress.entireBillingAddress,
+                        billingAddress.phone,
+                        order.paypal,
+                        order.username
+                        )
+    return customer

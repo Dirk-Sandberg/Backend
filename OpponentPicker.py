@@ -21,6 +21,7 @@ class OpponentPicker():
 
     def pickOpponents(self,filename):
         # What to do if an odd number of players? One has to get a buy? commented May 6, 2018 
+        print("pick opponents breaks if a user has signed more than once :( ")
         try:
             allParticipants = self.SS.readSheet(filename)
         except:
@@ -42,6 +43,10 @@ class OpponentPicker():
                     n = np.random.randint(numParticipants)
                     opp = allParticipants[n]["username"]
                     while (opp == p ) or ( allParticipants[n]['needsOpponent'] == "No" ) or (opp in pairs.keys()) :
+                       # print("player: " + p + " opponent: " + opp)
+                       # print("\topp " + allParticipants[n]['needsOpponent'])
+                       # print("pairs.keys(): ", pairs.keys())
+                        
                         # Try to pick opponent again if the player is either himself or doesn't need an opponent
                         n = np.random.randint(numParticipants)
                         opp = allParticipants[n]["username"]

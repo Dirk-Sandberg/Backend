@@ -17,3 +17,20 @@ class BillingAddress:
         self.country_code = country_code
         self.postal_code = postal_code
         self.phone = phone
+        self.entireBillingAddress = self.address1 + ";" + self.address2 + ";" + self.city + ";" + \
+                             self.state + ";" + self.country_code + ";" + self.postal_code
+   
+
+def newBillingAddress(order):
+    newBillingAddress = BillingAddress(order['billingAddress']['firstName'],
+        order['billingAddress']['lastName'],
+        order['billingAddress']['address1'],
+        order['billingAddress']['address2'],
+        order['billingAddress']['city'], order['billingAddress']['state'],
+        order['billingAddress']['countryCode'],
+        order['billingAddress']['postalCode'],
+        order['billingAddress']['phone'])
+    
+
+    return newBillingAddress
+        

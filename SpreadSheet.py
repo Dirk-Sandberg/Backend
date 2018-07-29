@@ -13,9 +13,18 @@ class SSWriter():
     def __init__(self):
         self.name = "Bob"
 
-    def writeSheet(self,sheetName,listOfDicts, writeHeader=True):
-        if len(listOfDicts) == 0:
+    def writeSheet(self,sheetName,listOfObjects, writeHeader=True):
+        contentType = type(listOfObjects[0])
+        if len(listOfObjects) == 0:
             return
+        listOfDicts = []
+        for obj in listOfObjects:
+            # listOfObjects is sometimes a list of objects, sometimes a list of dicts. Make them uniform by converting the objects to dicts
+            # Need to convert the Objects to Dicts so csv can writerows() correctly
+            if contentType != dict:
+                listOfDicts.append(obj.__dict__)
+            if contentType == dict:
+                listOfDicts.append(obj)
         with open(sheetName, "w") as f:
             columnNames = listOfDicts[0].keys()
             DW = csv.DictWriter(f, columnNames)
